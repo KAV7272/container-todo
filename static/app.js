@@ -20,6 +20,7 @@
     userList: document.getElementById("user-list"),
     refreshBtn: document.getElementById("refresh-btn"),
     toastContainer: document.getElementById("toast-container"),
+    notifyBtn: document.getElementById("notify-btn"),
   };
 
   const api = async (path, options = {}) => {
@@ -82,6 +83,58 @@
       osc.stop(ctx.currentTime + 0.35);
     } catch (_) {
       // Ignore audio errors (e.g., autoplay restrictions)
+    }
+  }
+
+  function updateNotifyButton() {
+    if (!els.notifyBtn) return;
+    if (!("Notification" in window)) {
+      els.notifyBtn.textContent = "Notifications unsupported";
+      els.notifyBtn.disabled = true;
+      return;
+    }
+    const perm = Notification.permission;
+    if (perm === "granted") {
+      els.notifyBtn.textContent = "Notifications on";
+      els.notifyBtn.disabled = true;
+    } else if (perm === "denied") {
+      els.notifyBtn.textContent = "Notifications blocked";
+      els.notifyBtn.disabled = true;
+    } else {
+      els.notifyBtn.textContent = "Enable notifications";
+      els.notifyBtn.disabled = false;
+    }
+  }
+
+  async function requestNotifyPermission() {
+    if (!("Notification" in window)) {
+      toast("Notifications not supported in this browser", "error");
+      return;
+    }
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        toast("Notifications enabled");
+      } else {
+        toast("Notifications blocked by browser", "error");
+      }
+    } catch (_) {
+      toast("Could not request notifications", "error");
+    } finally {
+      updateNotifyButton();
+    }
+  }
+
+  function maybeNotify(event) {
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+    if (!document.hidden) return;
+    const title = "Todo update";
+    const body = event && event.message ? event.message : "Task activity";
+    try {
+      new Notification(title, { body });
+    } catch (_) {
+      // Some browsers need a service worker for notifications; ignore if not available.
     }
   }
 
@@ -311,6 +364,10 @@
 
     els.refreshBtn.addEventListener("click", refreshAll);
     els.logoutBtn.addEventListener("click", logout);
+    if (els.notifyBtn) {
+      els.notifyBtn.addEventListener("click", requestNotifyPermission);
+      updateNotifyButton();
+    }
   }
 
   function connectEvents() {
@@ -320,6 +377,7 @@
         const data = JSON.parse(event.data);
         toast(data.message);
         chime(data.type);
+        maybeNotify(data);
         refreshAll();
       } catch (_) {
         refreshAll();

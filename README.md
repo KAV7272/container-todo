@@ -22,3 +22,7 @@ docker run -p 5000:5000 -v todo-data:/data --name container-todo container-todo
 Environment variables:
 - `SECRET_KEY`: set to a strong value in production.
 - `DATABASE_PATH`: optional custom SQLite path (default `/data/data.db` in the container).
+
+Notifications:
+- Browser notifications are triggered while the app tab is open; click “Enable notifications” in the top bar to allow.
+- For iOS, background notifications require installing the site as a PWA and push configuration (not included); foreground/background while the tab is open works with standard permissions.

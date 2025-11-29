@@ -24,6 +24,7 @@
       </div>
       <div class="top-actions" id="top-actions">
         {% if user %}
+        <button class="ghost" id="notify-btn">Enable notifications</button>
         <span class="user-chip">Signed in as <strong>{{ user["username"] }}</strong></span>
         <button class="ghost" id="logout-btn">Log out</button>
         {% endif %}
