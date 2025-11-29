@@ -80,12 +80,24 @@
                 <button class="ghost small" id="refresh-btn">Refresh</button>
               </div>
               <form id="new-task-form" class="new-task">
-                <input id="task-title" placeholder="Quick add a task" maxlength="160" required>
-                <input id="task-due" type="datetime-local" aria-label="Due date">
-                <select id="task-assignee">
-                  <option value="">Unassigned</option>
-                </select>
-                <button type="submit">Create</button>
+                <label class="field">
+                  <span class="field-label">Title</span>
+                  <input id="task-title" placeholder="Quick add a task" maxlength="160" required>
+                </label>
+                <label class="field">
+                  <span class="field-label">Due date</span>
+                  <input id="task-due" type="datetime-local" aria-label="Due date">
+                </label>
+                <label class="field">
+                  <span class="field-label">Assignee</span>
+                  <select id="task-assignee">
+                    <option value="">Unassigned</option>
+                  </select>
+                </label>
+                <div class="field create-btn-wrap">
+                  <span class="field-label">&nbsp;</span>
+                  <button type="submit">Create</button>
+                </div>
               </form>
               <ul id="task-list" class="task-list"></ul>
             </div>
