@@ -4,15 +4,48 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg: #0f172a;
+  --bg-card: rgba(15, 23, 42, 0.8);
+  --bg-input: #0b1629;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.06);
+  --accent: linear-gradient(135deg, #38bdf8, #22d3ee);
+  --accent-2: linear-gradient(135deg, #a855f7, #6366f1);
+  --chip: #1e293b;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --toast-bg: #0ea5e9;
+  --danger: #f43f5e;
+  --dot: linear-gradient(135deg, #38bdf8, #c084fc);
+}
+
+[data-theme="light"] {
+  --bg: #f7fafc;
+  --bg-card: #ffffff;
+  --bg-input: #edf2f7;
+  --text: #0f172a;
+  --muted: #4a5568;
+  --border: #e2e8f0;
+  --accent: linear-gradient(135deg, #2563eb, #38bdf8);
+  --accent-2: linear-gradient(135deg, #2563eb, #1d4ed8);
+  --chip: #e2e8f0;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --toast-bg: #2563eb;
+  --danger: #e11d48;
+  --dot: linear-gradient(135deg, #2563eb, #38bdf8);
+}
+
 body {
   margin: 0;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background: radial-gradient(circle at 20% 20%, #0ea5e9 0, #0ea5e920 15%, transparent 25%),
     radial-gradient(circle at 80% 10%, #a855f7 0, #a855f720 18%, transparent 32%),
-    #0f172a;
-  color: #e2e8f0;
+    var(--bg);
+  color: var(--text);
   min-height: 100vh;
   padding: 24px;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .page {
@@ -37,7 +70,7 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #38bdf8, #c084fc);
+  background: var(--dot);
   box-shadow: 0 0 12px #38bdf8;
 }
 
@@ -47,7 +80,7 @@ body {
 }
 
 .brand-sub {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -60,8 +93,8 @@ body {
 .user-chip {
   padding: 6px 10px;
   border-radius: 10px;
-  background: #1e293b;
-  color: #cbd5e1;
+  background: var(--chip);
+  color: var(--text);
   font-size: 14px;
 }
 
@@ -84,11 +117,12 @@ main.content {
 }
 
 .card {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow);
+  transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
 }
 
 .card-header {
@@ -107,7 +141,7 @@ main.content {
 }
 
 .muted {
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .small {
@@ -141,16 +175,17 @@ button {
 
 input,
 select {
-  border: 1px solid #1f2a44;
-  background: #0b1629;
-  color: #e2e8f0;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
   padding: 10px 12px;
   border-radius: 10px;
+  transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
 }
 
 button {
   border: none;
-  background: linear-gradient(135deg, #38bdf8, #22d3ee);
+  background: var(--accent);
   color: #0b1629;
   padding: 10px 14px;
   border-radius: 12px;
@@ -165,15 +200,20 @@ button:hover {
 }
 
 button.secondary {
-  background: linear-gradient(135deg, #a855f7, #6366f1);
+  background: var(--accent-2);
   color: #0b1629;
 }
 
 button.ghost {
   background: transparent;
-  border: 1px solid #1f2a44;
-  color: #e2e8f0;
+  border: 1px solid var(--border);
+  color: var(--text);
   box-shadow: none;
+}
+
+button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 button.small {
@@ -182,7 +222,7 @@ button.small {
 
 .new-task {
   display: grid;
-  grid-template-columns: 1.5fr 1fr auto;
+  grid-template-columns: 1.5fr 1.1fr 1fr auto;
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -202,9 +242,9 @@ button.small {
   align-items: center;
   gap: 10px;
   padding: 12px;
-  border: 1px solid #1f2a44;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #0b1629;
+  background: var(--bg-input);
 }
 
 .task .title {
@@ -212,7 +252,7 @@ button.small {
 }
 
 .task .meta {
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -225,11 +265,16 @@ button.small {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .checkbox {
   width: 18px;
   height: 18px;
+}
+
+.due-input {
+  min-width: 170px;
 }
 
 .sidebar {
@@ -248,11 +293,18 @@ button.small {
 .user {
   padding: 10px;
   border-radius: 10px;
-  background: #0b1629;
-  border: 1px solid #1f2a44;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+   justify-content: space-between;
+   align-items: center;
+   gap: 10px;
+   flex-wrap: wrap;
+}
+
+.user-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .hidden {
@@ -270,7 +322,7 @@ button.small {
 }
 
 .toast {
-  background: #0ea5e9;
+  background: var(--toast-bg);
   color: #0b1629;
   padding: 10px 12px;
   border-radius: 10px;

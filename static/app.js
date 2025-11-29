@@ -14,6 +14,7 @@
     logoutBtn: document.getElementById("logout-btn"),
     newTaskForm: document.getElementById("new-task-form"),
     taskTitle: document.getElementById("task-title"),
+    taskDue: document.getElementById("task-due"),
     taskAssignee: document.getElementById("task-assignee"),
     taskList: document.getElementById("task-list"),
     completedList: document.getElementById("completed-list"),
@@ -21,6 +22,7 @@
     refreshBtn: document.getElementById("refresh-btn"),
     toastContainer: document.getElementById("toast-container"),
     notifyBtn: document.getElementById("notify-btn"),
+    themeBtn: document.getElementById("theme-btn"),
   };
 
   const api = async (path, options = {}) => {
@@ -138,6 +140,43 @@
     }
   }
 
+  function getStoredTheme() {
+    return localStorage.getItem("todo-theme");
+  }
+
+  function applyTheme(theme) {
+    const resolved = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", resolved);
+    if (els.themeBtn) els.themeBtn.textContent = resolved === "light" ? "Dark" : "Light";
+    localStorage.setItem("todo-theme", resolved);
+  }
+
+  function initTheme() {
+    const stored = getStoredTheme();
+    if (stored) {
+      applyTheme(stored);
+      return;
+    }
+    const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    applyTheme(prefersLight ? "light" : "dark");
+  }
+
+  function toInputDateValue(isoString) {
+    if (!isoString) return "";
+    try {
+      const dt = new Date(isoString);
+      const pad = (n) => String(n).padStart(2, "0");
+      const yyyy = dt.getFullYear();
+      const mm = pad(dt.getMonth() + 1);
+      const dd = pad(dt.getDate());
+      const hh = pad(dt.getHours());
+      const min = pad(dt.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    } catch (_) {
+      return "";
+    }
+  }
+
   async function handleAuth(form, endpoint) {
     const data = Object.fromEntries(new FormData(form).entries());
     try {
@@ -164,11 +203,17 @@
             user.created_at
           ).toLocaleString()}</div>
         </div>
-        <button class="ghost small" data-assign="${user.id}">Assign</button>
+        <div class="user-actions">
+          <button class="ghost small" data-assign="${user.id}">Assign</button>
+          <button class="ghost small danger" data-delete-user="${user.id}">Delete</button>
+        </div>
       `;
       li
         .querySelector("[data-assign]")
         .addEventListener("click", () => setAssignee(user.id));
+      li
+        .querySelector("[data-delete-user]")
+        .addEventListener("click", () => deleteUser(user.id));
       els.userList.appendChild(li);
     });
   }
@@ -209,6 +254,9 @@
     li.dataset.id = task.id;
     const assigned =
       task.assigned_username || (task.assigned_user_id ? "User" : "Nobody");
+    const due = task.due_date
+      ? new Date(task.due_date).toLocaleString()
+      : "No due date";
     li.innerHTML = `
       <input class="checkbox" type="checkbox" ${
         task.completed ? "checked" : ""
@@ -218,6 +266,7 @@
         <div class="meta">
           ${task.assigned_user_id ? `Assigned to ${assigned}` : "Unassigned"} ·
           Created ${new Date(task.created_at).toLocaleString()}
+          · Due ${due}
           ${
             task.completed_at
               ? " · Completed " + new Date(task.completed_at).toLocaleString()
@@ -229,6 +278,9 @@
         <select class="assign">
           <option value="">Unassigned</option>
         </select>
+        <input class="due-input" type="datetime-local" value="${toInputDateValue(
+          task.due_date
+        )}" aria-label="set due date">
         <button class="ghost small" data-delete>Delete</button>
       </div>
     `;
@@ -243,6 +295,9 @@
     select.addEventListener("change", () =>
       updateAssignee(task.id, select.value)
     );
+
+    const dueInput = li.querySelector(".due-input");
+    dueInput.addEventListener("change", () => updateDueDate(task.id, dueInput.value));
 
     li.querySelector("[data-delete]").addEventListener("click", () =>
       deleteTask(task.id)
@@ -283,12 +338,15 @@
     const title = els.taskTitle.value.trim();
     if (!title) return;
     const assigned = els.taskAssignee.value || null;
+    const dueInput = els.taskDue ? els.taskDue.value : "";
+    const due_date = dueInput ? new Date(dueInput).toISOString() : null;
     try {
       await api("/api/tasks", {
         method: "POST",
-        body: JSON.stringify({ title, assigned_user_id: assigned }),
+        body: JSON.stringify({ title, assigned_user_id: assigned, due_date }),
       });
       els.taskTitle.value = "";
+      if (els.taskDue) els.taskDue.value = "";
       await refreshAll();
       chime("created");
     } catch (err) {
@@ -321,11 +379,35 @@
     }
   }
 
+  async function updateDueDate(id, dueInput) {
+    const due_date = dueInput ? new Date(dueInput).toISOString() : null;
+    try {
+      await api(`/api/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ due_date }),
+      });
+      await refreshAll();
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  }
+
   async function deleteTask(id) {
     try {
       await api(`/api/tasks/${id}`, { method: "DELETE" });
       await refreshAll();
       chime("deleted");
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  }
+
+  async function deleteUser(id) {
+    if (!confirm("Delete this user? Tasks will be unassigned.")) return;
+    try {
+      await api(`/api/users/${id}`, { method: "DELETE" });
+      await refreshAll();
+      toast("User deleted");
     } catch (err) {
       toast(err.message, "error");
     }
@@ -368,6 +450,12 @@
       els.notifyBtn.addEventListener("click", requestNotifyPermission);
       updateNotifyButton();
     }
+    if (els.themeBtn) {
+      els.themeBtn.addEventListener("click", () => {
+        const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+        applyTheme(next);
+      });
+    }
   }
 
   function connectEvents() {
@@ -392,6 +480,7 @@
   }
 
   async function bootstrap() {
+    initTheme();
     if (!state.currentUser) {
       els.authView?.classList.remove("hidden");
       bindAuth();

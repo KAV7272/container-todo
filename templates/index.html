@@ -25,6 +25,7 @@
       <div class="top-actions" id="top-actions">
         {% if user %}
         <button class="ghost" id="notify-btn">Enable notifications</button>
+        <button class="ghost" id="theme-btn" aria-label="Toggle theme">Light</button>
         <span class="user-chip">Signed in as <strong>{{ user["username"] }}</strong></span>
         <button class="ghost" id="logout-btn">Log out</button>
         {% endif %}
@@ -80,6 +81,7 @@
               </div>
               <form id="new-task-form" class="new-task">
                 <input id="task-title" placeholder="Quick add a task" maxlength="160" required>
+                <input id="task-due" type="datetime-local" aria-label="Due date">
                 <select id="task-assignee">
                   <option value="">Unassigned</option>
                 </select>

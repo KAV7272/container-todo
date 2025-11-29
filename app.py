@@ -57,10 +57,15 @@ def init_db():
             assigned_user_id INTEGER,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             completed_at TEXT,
+            due_date TEXT,
             FOREIGN KEY (assigned_user_id) REFERENCES users(id)
         );
         """
     )
+    # Ensure due_date exists if DB already created.
+    cols = {row[1] for row in cur.execute("PRAGMA table_info(tasks)").fetchall()}
+    if "due_date" not in cols:
+        cur.execute("ALTER TABLE tasks ADD COLUMN due_date TEXT")
     conn.commit()
     conn.close()
 
@@ -109,6 +114,7 @@ def format_task(row):
         "assigned_username": row["assigned_username"],
         "created_at": row["created_at"],
         "completed_at": row["completed_at"],
+        "due_date": row["due_date"],
     }
 
 
@@ -194,6 +200,31 @@ def list_users():
     )
 
 
+@app.delete("/api/users/<int:user_id>")
+@login_required
+def delete_user(user_id: int):
+    conn = get_db()
+    user = conn.execute(
+        "SELECT id, username FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+    if user is None:
+        conn.close()
+        return jsonify({"error": "User not found."}), 404
+
+    # Unassign tasks owned by this user to keep history intact.
+    conn.execute(
+        "UPDATE tasks SET assigned_user_id = NULL WHERE assigned_user_id = ?", (user_id,)
+    )
+    conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+    if session.get("user_id") == user_id:
+        session.clear()
+    broadcast_event("user_deleted", f'User "{user["username"]}" removed', {"user_id": user_id})
+    return jsonify({"ok": True})
+
+
 @app.get("/api/tasks")
 @login_required
 def get_tasks():
@@ -216,6 +247,7 @@ def create_task():
     data = request.get_json() or {}
     title = (data.get("title") or "").strip()
     assigned_user_id = data.get("assigned_user_id")
+    due_date = (data.get("due_date") or "").strip() or None
 
     if not title:
         return jsonify({"error": "Title is required."}), 400
@@ -231,8 +263,8 @@ def create_task():
             return jsonify({"error": "Assigned user not found."}), 400
 
     cur = conn.execute(
-        "INSERT INTO tasks (title, assigned_user_id) VALUES (?, ?)",
-        (title, assigned_user_id),
+        "INSERT INTO tasks (title, assigned_user_id, due_date) VALUES (?, ?, ?)",
+        (title, assigned_user_id, due_date),
     )
     conn.commit()
     task_id = cur.lastrowid
@@ -262,6 +294,7 @@ def update_task(task_id: int):
     title = data.get("title")
     completed = data.get("completed")
     assigned_user_id = data.get("assigned_user_id")
+    due_date = data.get("due_date")
 
     conn = get_db()
     row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
@@ -295,6 +328,11 @@ def update_task(task_id: int):
                 return jsonify({"error": "Assigned user not found."}), 400
         updates.append("assigned_user_id = ?")
         params.append(assigned_user_id)
+
+    if due_date is not None:
+        due_val = due_date.strip() if isinstance(due_date, str) else None
+        updates.append("due_date = ?")
+        params.append(due_val or None)
 
     if not updates:
         conn.close()

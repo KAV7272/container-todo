@@ -26,3 +26,8 @@ Environment variables:
 Notifications:
 - Browser notifications are triggered while the app tab is open; click “Enable notifications” in the top bar to allow.
 - For iOS, background notifications require installing the site as a PWA and push configuration (not included); foreground/background while the tab is open works with standard permissions.
+
+UI tips:
+- Toggle light/dark with the “Light/Dark” button in the top bar.
+- Users can be deleted from the People list; their tasks are kept but unassigned.
+- Add due dates when creating tasks or adjust them inline on each task.
