@@ -75,7 +75,7 @@
         info: 760,
       };
       osc.frequency.value = tones[kind] || 720;
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(
         0.001,
         ctx.currentTime + 0.35
@@ -177,6 +177,23 @@
     }
   }
 
+  function formatDateTime(isoString) {
+    if (!isoString) return "—";
+    try {
+      const dt = new Date(isoString);
+      return dt.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch (_) {
+      return isoString;
+    }
+  }
+
   async function handleAuth(form, endpoint) {
     const data = Object.fromEntries(new FormData(form).entries());
     try {
@@ -199,9 +216,7 @@
       li.innerHTML = `
         <div>
           <div><strong>${user.username}</strong></div>
-          <div class="muted small">created ${new Date(
-            user.created_at
-          ).toLocaleString()}</div>
+          <div class="muted small">created ${formatDateTime(user.created_at)}</div>
         </div>
         <div class="user-actions">
           <button class="ghost small" data-assign="${user.id}">Assign</button>
@@ -254,9 +269,7 @@
     li.dataset.id = task.id;
     const assigned =
       task.assigned_username || (task.assigned_user_id ? "User" : "Nobody");
-    const due = task.due_date
-      ? new Date(task.due_date).toLocaleString()
-      : "No due date";
+    const due = formatDateTime(task.due_date);
     li.innerHTML = `
       <input class="checkbox" type="checkbox" ${
         task.completed ? "checked" : ""
@@ -265,11 +278,11 @@
         <div class="title">${task.title}</div>
         <div class="meta">
           ${task.assigned_user_id ? `Assigned to ${assigned}` : "Unassigned"} ·
-          Created ${new Date(task.created_at).toLocaleString()}
+          Created ${formatDateTime(task.created_at)}
           · Due ${due}
           ${
             task.completed_at
-              ? " · Completed " + new Date(task.completed_at).toLocaleString()
+              ? " · Completed " + formatDateTime(task.completed_at)
               : ""
           }
         </div>
