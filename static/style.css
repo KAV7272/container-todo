@@ -5,43 +5,41 @@
 }
 
 :root {
-  --bg: #0f172a;
-  --bg-card: rgba(15, 23, 42, 0.8);
-  --bg-input: #0b1629;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
-  --border: rgba(255, 255, 255, 0.06);
-  --accent: linear-gradient(135deg, #38bdf8, #22d3ee);
-  --accent-2: linear-gradient(135deg, #a855f7, #6366f1);
-  --chip: #1e293b;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --toast-bg: #0ea5e9;
-  --danger: #f43f5e;
-  --dot: linear-gradient(135deg, #38bdf8, #c084fc);
+  --bg: #0b1220;
+  --bg-card: #111827;
+  --bg-input: #0f172a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: #1f2937;
+  --accent: linear-gradient(135deg, #2563eb, #38bdf8);
+  --accent-2: linear-gradient(135deg, #1e3a8a, #2563eb);
+  --chip: #111827;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --toast-bg: #2563eb;
+  --danger: #ef4444;
+  --dot: linear-gradient(135deg, #38bdf8, #2563eb);
 }
 
 [data-theme="light"] {
   --bg: #f7fafc;
   --bg-card: #ffffff;
   --bg-input: #edf2f7;
-  --text: #0f172a;
-  --muted: #4a5568;
+  --text: #0b1220;
+  --muted: #4b5563;
   --border: #e2e8f0;
-  --accent: linear-gradient(135deg, #2563eb, #38bdf8);
-  --accent-2: linear-gradient(135deg, #2563eb, #1d4ed8);
+  --accent: linear-gradient(135deg, #1d4ed8, #2563eb);
+  --accent-2: linear-gradient(135deg, #0f172a, #1e3a8a);
   --chip: #e2e8f0;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   --toast-bg: #2563eb;
-  --danger: #e11d48;
+  --danger: #dc2626;
   --dot: linear-gradient(135deg, #2563eb, #38bdf8);
 }
 
 body {
   margin: 0;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: radial-gradient(circle at 20% 20%, #0ea5e9 0, #0ea5e920 15%, transparent 25%),
-    radial-gradient(circle at 80% 10%, #a855f7 0, #a855f720 18%, transparent 32%),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   padding: 24px;
@@ -186,7 +184,7 @@ select {
 button {
   border: none;
   background: var(--accent);
-  color: #0b1629;
+  color: #f8fafc;
   padding: 10px 14px;
   border-radius: 12px;
   cursor: pointer;
@@ -196,12 +194,12 @@ button {
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
 }
 
 button.secondary {
   background: var(--accent-2);
-  color: #0b1629;
+  color: #f8fafc;
 }
 
 button.ghost {
@@ -258,7 +256,7 @@ button.small {
 
 .task.complete .title {
   text-decoration: line-through;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .task-actions {
