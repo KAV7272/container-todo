@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Container Todo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    window.APP_CONTEXT = {
+      user: {{ ({"id": user["id"], "username": user["username"]} if user else None)|tojson }}
+    };
+  </script>
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div class="brand-title">Container Todo</div>
+          <div class="brand-sub">Stay in sync inside your Docker</div>
+        </div>
+      </div>
+      <div class="top-actions" id="top-actions">
+        {% if user %}
+        <span class="user-chip">Signed in as <strong>{{ user["username"] }}</strong></span>
+        <button class="ghost" id="logout-btn">Log out</button>
+        {% endif %}
+      </div>
+    </header>
+
+    <main class="content">
+      <section id="auth-view" class="{% if user %}hidden{% endif %}">
+        <div class="card auth-card">
+          <h2>Welcome back</h2>
+          <p class="muted">Sign in or create an account to manage todos.</p>
+          <form id="login-form" class="stack">
+            <label>
+              <span>Username</span>
+              <input name="username" autocomplete="username" required>
+            </label>
+            <label>
+              <span>Password</span>
+              <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit">Sign in</button>
+            <p class="muted small">No account? Use the create form.</p>
+          </form>
+        </div>
+
+        <div class="card auth-card">
+          <h2>Create account</h2>
+          <p class="muted">New here? Register and jump in.</p>
+          <form id="register-form" class="stack">
+            <label>
+              <span>Username</span>
+              <input name="username" autocomplete="username" required>
+            </label>
+            <label>
+              <span>Password</span>
+              <input type="password" name="password" autocomplete="new-password" required>
+            </label>
+            <button type="submit" class="secondary">Create account</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="app-view" class="{% if not user %}hidden{% endif %}">
+        <div class="layout">
+          <div class="column">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="eyebrow">Open list</div>
+                  <h2>Your todos</h2>
+                </div>
+                <button class="ghost small" id="refresh-btn">Refresh</button>
+              </div>
+              <form id="new-task-form" class="new-task">
+                <input id="task-title" placeholder="Quick add a task" maxlength="160" required>
+                <select id="task-assignee">
+                  <option value="">Unassigned</option>
+                </select>
+                <button type="submit">Create</button>
+              </form>
+              <ul id="task-list" class="task-list"></ul>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="eyebrow">Completed</div>
+                  <h2>History</h2>
+                </div>
+              </div>
+              <ul id="completed-list" class="task-list"></ul>
+            </div>
+          </div>
+
+          <aside class="sidebar card">
+            <div class="card-header">
+              <div>
+                <div class="eyebrow">People</div>
+                <h2>Users in this container</h2>
+              </div>
+            </div>
+            <ul id="user-list" class="user-list"></ul>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast-container"></div>
+</body>
+</html>
