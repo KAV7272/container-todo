@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script>
     window.APP_CONTEXT = {
-      user: {{ ({"id": user["id"], "username": user["username"]} if user else None)|tojson }}
+      user: {{ ({"id": user["id"], "username": user["username"], "is_admin": bool(user["is_admin"])} if user else None)|tojson }},
+      firstUserAllowed: {{ first_user_allowed|tojson }}
     };
   </script>
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
@@ -22,7 +23,7 @@
       <section id="auth-view" class="{% if user %}hidden{% endif %}">
         <div class="card auth-card">
           <h2>Welcome back</h2>
-          <p class="muted">Sign in or create an account to manage todos.</p>
+          <p class="muted">Sign in to manage todos.</p>
           <form id="login-form" class="stack">
             <label>
               <span>Username</span>
@@ -37,9 +38,10 @@
           </form>
         </div>
 
+        {% if first_user_allowed %}
         <div class="card auth-card">
-          <h2>Create account</h2>
-          <p class="muted">New here? Register and jump in.</p>
+          <h2>Create admin</h2>
+          <p class="muted">Set up the first admin account.</p>
           <form id="register-form" class="stack">
             <label>
               <span>Username</span>
@@ -49,9 +51,10 @@
               <span>Password</span>
               <input type="password" name="password" autocomplete="new-password" required>
             </label>
-            <button type="submit" class="secondary">Create account</button>
+            <button type="submit" class="secondary">Create admin</button>
           </form>
         </div>
+        {% endif %}
       </section>
 
       <section id="app-view" class="{% if not user %}hidden{% endif %}">
@@ -113,6 +116,20 @@
               </div>
             </div>
             <ul id="user-list" class="user-list"></ul>
+            {% if user and user["is_admin"] %}
+            <div class="divider"></div>
+            <form id="add-user-form" class="stack">
+              <label class="field">
+                <span class="field-label">New user</span>
+                <input id="add-user-name" autocomplete="off" required>
+              </label>
+              <label class="field">
+                <span class="field-label">Password</span>
+                <input id="add-user-pass" type="password" required>
+              </label>
+              <button type="submit" class="secondary small">Add user</button>
+            </form>
+            {% endif %}
           </aside>
 
           <div class="card controls-card">

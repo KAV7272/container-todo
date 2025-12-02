@@ -461,6 +461,12 @@ button.small {
   gap: 10px;
 }
 
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+
 .title-row {
   display: flex;
   justify-content: space-between;
