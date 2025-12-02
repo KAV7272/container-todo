@@ -234,7 +234,10 @@ def get_tasks():
         SELECT tasks.*, users.username AS assigned_username
         FROM tasks
         LEFT JOIN users ON users.id = tasks.assigned_user_id
-        ORDER BY tasks.created_at DESC
+        ORDER BY
+          CASE WHEN tasks.due_date IS NULL THEN 1 ELSE 0 END,
+          datetime(tasks.due_date) ASC,
+          tasks.created_at DESC
         """
     ).fetchall()
     conn.close()

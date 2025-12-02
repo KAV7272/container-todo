@@ -63,7 +63,10 @@
                   <div class="eyebrow">Open list</div>
                   <h2>Your todos</h2>
                 </div>
-                <button class="ghost small" id="refresh-btn">Refresh</button>
+                <div class="card-meta">
+                  <div class="eyebrow" id="task-count">0 tasks</div>
+                  <button class="ghost small" id="refresh-btn">Refresh</button>
+                </div>
               </div>
               <form id="new-task-form" class="new-task">
                 <label class="field">
@@ -108,16 +111,17 @@
             </div>
             <ul id="user-list" class="user-list"></ul>
           </aside>
+
+          <div class="card controls-card">
+            <div class="controls-grid">
+              <button class="ghost" id="notify-btn">Notifications</button>
+              <button class="ghost" id="theme-btn" aria-label="Toggle theme">Light</button>
+              <button class="ghost" id="logout-btn">Log out</button>
+            </div>
+          </div>
         </div>
       </section>
     </main>
-    {% if user %}
-    <footer class="footer-bar">
-      <button class="ghost" id="notify-btn">Notifications</button>
-      <button class="ghost" id="theme-btn" aria-label="Toggle theme">Light</button>
-      <button class="ghost" id="logout-btn">Log out</button>
-    </footer>
-    {% endif %}
   </div>
   <div id="toast-container"></div>
 </body>

@@ -23,6 +23,7 @@
     toastContainer: document.getElementById("toast-container"),
     notifyBtn: document.getElementById("notify-btn"),
     themeBtn: document.getElementById("theme-btn"),
+    taskCount: document.getElementById("task-count"),
   };
 
   const api = async (path, options = {}) => {
@@ -251,6 +252,10 @@
     els.completedList.innerHTML = "";
     const active = tasks.filter((t) => !t.completed);
     const done = tasks.filter((t) => t.completed);
+    if (els.taskCount) {
+      const total = tasks.length;
+      els.taskCount.textContent = `${total} ${total === 1 ? "task" : "tasks"}`;
+    }
 
     active.forEach((task) => {
       const li = createTaskElement(task);
