@@ -309,13 +309,14 @@ button.small {
 }
 
 .task-actions .split-input {
-  width: 100%;
-  max-width: 100%;
+  width: auto;
+  min-width: 180px;
+  max-width: 240px;
 }
 
 .task-actions .split-input input {
-  font-size: 15px;
-  padding: 10px 12px;
+  font-size: 14px;
+  padding: 8px 10px;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
@@ -445,6 +446,8 @@ button.small {
 
   .split-input {
     grid-template-columns: 1fr;
+    min-width: 0;
+    max-width: 100%;
   }
 }
 
