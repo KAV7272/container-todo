@@ -277,14 +277,9 @@
       <div>
         <div class="title">${task.title}</div>
         <div class="meta">
-          ${task.assigned_user_id ? `Assigned to ${assigned}` : "Unassigned"} ·
-          Created ${formatDateTime(task.created_at)}
+          ${task.assigned_user_id ? `Assigned to ${assigned}` : "Unassigned"}
           · Due ${due}
-          ${
-            task.completed_at
-              ? " · Completed " + formatDateTime(task.completed_at)
-              : ""
-          }
+          ${task.completed_at ? " · Completed " + formatDateTime(task.completed_at) : ""}
         </div>
       </div>
       <div class="task-actions">

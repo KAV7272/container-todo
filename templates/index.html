@@ -15,21 +15,7 @@
 <body>
   <div class="page">
     <header class="topbar">
-      <div class="brand">
-        <div class="dot"></div>
-        <div>
-          <div class="brand-title">Container Todo</div>
-          <div class="brand-sub">Stay in sync inside your Docker</div>
-        </div>
-      </div>
-      <div class="top-actions" id="top-actions">
-        {% if user %}
-        <button class="ghost" id="notify-btn">Enable notifications</button>
-        <button class="ghost" id="theme-btn" aria-label="Toggle theme">Light</button>
-        <span class="user-chip">Signed in as <strong>{{ user["username"] }}</strong></span>
-        <button class="ghost" id="logout-btn">Log out</button>
-        {% endif %}
-      </div>
+      <div></div>
     </header>
 
     <main class="content">
@@ -125,6 +111,13 @@
         </div>
       </section>
     </main>
+    {% if user %}
+    <footer class="footer-bar">
+      <button class="ghost" id="notify-btn">Notifications</button>
+      <button class="ghost" id="theme-btn" aria-label="Toggle theme">Light</button>
+      <button class="ghost" id="logout-btn">Log out</button>
+    </footer>
+    {% endif %}
   </div>
   <div id="toast-container"></div>
 </body>
