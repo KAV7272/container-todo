@@ -14,7 +14,8 @@
     logoutBtn: document.getElementById("logout-btn"),
     newTaskForm: document.getElementById("new-task-form"),
     taskTitle: document.getElementById("task-title"),
-    taskDue: document.getElementById("task-due"),
+    taskDueDate: document.getElementById("task-due-date"),
+    taskDueTime: document.getElementById("task-due-time"),
     taskAssignee: document.getElementById("task-assignee"),
     taskList: document.getElementById("task-list"),
     completedList: document.getElementById("completed-list"),
@@ -162,22 +163,6 @@
     applyTheme(prefersLight ? "light" : "dark");
   }
 
-  function toInputDateValue(isoString) {
-    if (!isoString) return "";
-    try {
-      const dt = new Date(isoString);
-      const pad = (n) => String(n).padStart(2, "0");
-      const yyyy = dt.getFullYear();
-      const mm = pad(dt.getMonth() + 1);
-      const dd = pad(dt.getDate());
-      const hh = pad(dt.getHours());
-      const min = pad(dt.getMinutes());
-      return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-    } catch (_) {
-      return "";
-    }
-  }
-
   function formatDateTime(isoString) {
     if (!isoString) return "—";
     try {
@@ -193,6 +178,36 @@
     } catch (_) {
       return isoString;
     }
+  }
+
+  function toDateInput(isoString) {
+    if (!isoString) return "";
+    try {
+      const dt = new Date(isoString);
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function toTimeInput(isoString) {
+    if (!isoString) return "";
+    try {
+      const dt = new Date(isoString);
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function combineDateTime(dateStr, timeStr) {
+    if (!dateStr) return null;
+    const time = timeStr && timeStr.length ? timeStr : "00:00";
+    const candidate = new Date(`${dateStr}T${time}`);
+    if (isNaN(candidate.getTime())) return null;
+    return candidate.toISOString();
   }
 
   async function handleAuth(form, endpoint) {
@@ -280,20 +295,36 @@
         task.completed ? "checked" : ""
       } aria-label="complete ${task.title}">
       <div>
-        <div class="title">${task.title}</div>
-        <div class="meta">
-          ${task.assigned_user_id ? `Assigned to ${assigned}` : "Unassigned"}
-          · Due ${due}
-          ${task.completed_at ? " · Completed " + formatDateTime(task.completed_at) : ""}
+        <div class="title-row">
+          <div class="title">${task.title}</div>
+          <div class="info-wrapper">
+            <button class="info-btn" aria-label="Task info">i</button>
+            <div class="info-tooltip">
+              <div><strong>Assigned:</strong> ${task.assigned_user_id ? assigned : "Unassigned"}</div>
+              <div><strong>Due:</strong> ${due}</div>
+              ${
+                task.completed_at
+                  ? `<div><strong>Completed:</strong> ${formatDateTime(task.completed_at)}</div>`
+                  : ""
+              }
+              <div><strong>Created:</strong> ${formatDateTime(task.created_at)}</div>
+            </div>
+          </div>
         </div>
+        <div class="meta">Due ${due}</div>
       </div>
       <div class="task-actions">
         <select class="assign">
           <option value="">Unassigned</option>
         </select>
-        <input class="due-input" type="datetime-local" value="${toInputDateValue(
-          task.due_date
-        )}" aria-label="set due date">
+        <div class="split-input">
+          <input class="due-date-input" type="date" value="${toDateInput(
+            task.due_date
+          )}" aria-label="set due date">
+          <input class="due-time-input" type="time" value="${toTimeInput(
+            task.due_date
+          )}" aria-label="set due time">
+        </div>
         <button class="ghost small" data-delete>Delete</button>
       </div>
     `;
@@ -309,8 +340,14 @@
       updateAssignee(task.id, select.value)
     );
 
-    const dueInput = li.querySelector(".due-input");
-    dueInput.addEventListener("change", () => updateDueDate(task.id, dueInput.value));
+    const dueDateInput = li.querySelector(".due-date-input");
+    const dueTimeInput = li.querySelector(".due-time-input");
+    dueDateInput.addEventListener("change", () =>
+      updateDueDate(task.id, dueDateInput.value, dueTimeInput.value)
+    );
+    dueTimeInput.addEventListener("change", () =>
+      updateDueDate(task.id, dueDateInput.value, dueTimeInput.value)
+    );
 
     li.querySelector("[data-delete]").addEventListener("click", () =>
       deleteTask(task.id)
@@ -351,15 +388,17 @@
     const title = els.taskTitle.value.trim();
     if (!title) return;
     const assigned = els.taskAssignee.value || null;
-    const dueInput = els.taskDue ? els.taskDue.value : "";
-    const due_date = dueInput ? new Date(dueInput).toISOString() : null;
+    const dueDate = els.taskDueDate ? els.taskDueDate.value : "";
+    const dueTime = els.taskDueTime ? els.taskDueTime.value : "";
+    const due_date = combineDateTime(dueDate, dueTime);
     try {
       await api("/api/tasks", {
         method: "POST",
         body: JSON.stringify({ title, assigned_user_id: assigned, due_date }),
       });
       els.taskTitle.value = "";
-      if (els.taskDue) els.taskDue.value = "";
+      if (els.taskDueDate) els.taskDueDate.value = "";
+      if (els.taskDueTime) els.taskDueTime.value = "";
       await refreshAll();
       chime("created");
     } catch (err) {
@@ -392,8 +431,8 @@
     }
   }
 
-  async function updateDueDate(id, dueInput) {
-    const due_date = dueInput ? new Date(dueInput).toISOString() : null;
+  async function updateDueDate(id, dueInput, timeInput) {
+    const due_date = combineDateTime(dueInput, timeInput);
     try {
       await api(`/api/tasks/${id}`, {
         method: "PATCH",

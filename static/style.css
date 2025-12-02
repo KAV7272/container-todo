@@ -248,6 +248,17 @@ button.small {
   align-items: flex-end;
 }
 
+.split-input {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.split-input input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .task-list {
   list-style: none;
   padding: 0;
@@ -293,13 +304,21 @@ button.small {
 .task-actions select,
 .task-actions .due-input {
   width: 100%;
-  max-width: 280px;
+  max-width: 100%;
   min-width: 140px;
 }
 
-.task-actions .due-input {
+.task-actions .split-input {
+  width: 100%;
+  max-width: 100%;
+}
+
+.task-actions .split-input input {
   font-size: 15px;
   padding: 10px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 .checkbox {
   width: 22px;
@@ -423,6 +442,10 @@ button.small {
     width: 100%;
     max-width: 100%;
   }
+
+  .split-input {
+    grid-template-columns: 1fr;
+  }
 }
 
 .controls-card {
@@ -433,4 +456,47 @@ button.small {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-wrapper {
+  position: relative;
+}
+
+.info-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.info-tooltip {
+  position: absolute;
+  right: 0;
+  top: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: var(--shadow);
+  display: none;
+  min-width: 200px;
+  z-index: 10;
+}
+
+.info-wrapper:hover .info-tooltip,
+.info-wrapper:focus-within .info-tooltip {
+  display: block;
 }
