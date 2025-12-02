@@ -105,7 +105,7 @@ main.content {
 .layout {
   display: grid;
   gap: 14px;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 2.5fr 0.9fr;
 }
 
 .column {
@@ -272,11 +272,12 @@ button.small {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 14px;
+  padding: 16px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--bg-input);
+  min-height: 120px;
 }
 
 .task .title {
@@ -352,7 +353,8 @@ button.small {
 }
 
 .sidebar {
-  min-width: 240px;
+  min-width: 220px;
+  max-width: 320px;
 }
 
 .user-list {
@@ -483,12 +485,14 @@ button.small {
   background: transparent;
   color: var(--text);
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   font-weight: 700;
+  line-height: 1;
 }
 
 .info-tooltip {

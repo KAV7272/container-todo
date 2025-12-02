@@ -11,6 +11,9 @@
     appView: document.getElementById("app-view"),
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
+    addUserForm: document.getElementById("add-user-form"),
+    addUserName: document.getElementById("add-user-name"),
+    addUserPass: document.getElementById("add-user-pass"),
     logoutBtn: document.getElementById("logout-btn"),
     newTaskForm: document.getElementById("new-task-form"),
     taskTitle: document.getElementById("task-title"),
@@ -506,6 +509,26 @@
       els.themeBtn.addEventListener("click", () => {
         const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
         applyTheme(next);
+      });
+    }
+
+    if (els.addUserForm) {
+      els.addUserForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = els.addUserName.value.trim();
+        const password = els.addUserPass.value;
+        if (!username || !password) return;
+        api("/auth/register", {
+          method: "POST",
+          body: JSON.stringify({ username, password }),
+        })
+          .then(() => {
+            els.addUserName.value = "";
+            els.addUserPass.value = "";
+            toast("User created");
+            refreshAll();
+          })
+          .catch((err) => toast(err.message, "error"));
       });
     }
 
