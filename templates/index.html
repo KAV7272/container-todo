@@ -7,8 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script>
     window.APP_CONTEXT = {
-      user: {{ user|tojson }},
-      firstUserAllowed: {{ first_user_allowed|tojson }}
+      user: {{ user|tojson }}
     };
   </script>
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
@@ -38,10 +37,9 @@
           </form>
         </div>
 
-        {% if first_user_allowed %}
         <div class="card auth-card">
-          <h2>Create admin</h2>
-          <p class="muted">Set up the first admin account.</p>
+          <h2>Create account</h2>
+          <p class="muted">New here? Register and jump in.</p>
           <form id="register-form" class="stack">
             <label>
               <span>Username</span>
@@ -51,10 +49,9 @@
               <span>Password</span>
               <input type="password" name="password" autocomplete="new-password" required>
             </label>
-            <button type="submit" class="secondary">Create admin</button>
+            <button type="submit" class="secondary">Create account</button>
           </form>
         </div>
-        {% endif %}
       </section>
 
       <section id="app-view" class="{% if not user %}hidden{% endif %}">
@@ -116,20 +113,6 @@
               </div>
             </div>
             <ul id="user-list" class="user-list"></ul>
-            {% if user and user["is_admin"] %}
-            <div class="divider"></div>
-            <form id="add-user-form" class="stack">
-              <label class="field">
-                <span class="field-label">New user</span>
-                <input id="add-user-name" autocomplete="off" required>
-              </label>
-              <label class="field">
-                <span class="field-label">Password</span>
-                <input id="add-user-pass" type="password" required>
-              </label>
-              <button type="submit" class="secondary small">Add user</button>
-            </form>
-            {% endif %}
           </aside>
 
           <div class="card controls-card">

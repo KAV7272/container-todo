@@ -11,9 +11,6 @@
     appView: document.getElementById("app-view"),
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
-    addUserForm: document.getElementById("add-user-form"),
-    addUserName: document.getElementById("add-user-name"),
-    addUserPass: document.getElementById("add-user-pass"),
     logoutBtn: document.getElementById("logout-btn"),
     newTaskForm: document.getElementById("new-task-form"),
     taskTitle: document.getElementById("task-title"),
@@ -216,14 +213,10 @@
   async function handleAuth(form, endpoint) {
     const data = Object.fromEntries(new FormData(form).entries());
     try {
-      const res = await api(endpoint, {
+      await api(endpoint, {
         method: "POST",
         body: JSON.stringify(data),
       });
-      if (endpoint === "/auth/register" && state.currentUser?.is_admin) {
-        toast("User created");
-        return;
-      }
       location.reload();
     } catch (err) {
       toast(err.message, "error");
@@ -243,7 +236,7 @@
         </div>
         <div class="user-actions">
           <button class="ghost small" data-assign="${user.id}">Assign</button>
-          ${state.currentUser?.is_admin ? `<button class="ghost small danger" data-delete-user="${user.id}">Delete</button>` : ""}
+          <button class="ghost small danger" data-delete-user="${user.id}">Delete</button>
         </div>
       `;
       li
@@ -251,7 +244,7 @@
         .addEventListener("click", () => setAssignee(user.id));
       li
         .querySelector("[data-delete-user]")
-        ?.addEventListener("click", () => deleteUser(user.id));
+        .addEventListener("click", () => deleteUser(user.id));
       els.userList.appendChild(li);
     });
   }
@@ -516,25 +509,6 @@
       });
     }
 
-    if (state.currentUser?.is_admin && els.addUserForm) {
-      els.addUserForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const username = els.addUserName.value.trim();
-        const password = els.addUserPass.value;
-        if (!username || !password) return;
-        api("/auth/register", {
-          method: "POST",
-          body: JSON.stringify({ username, password }),
-        })
-          .then(() => {
-            els.addUserName.value = "";
-            els.addUserPass.value = "";
-            toast("User created");
-            refreshAll();
-          })
-          .catch((err) => toast(err.message, "error"));
-      });
-    }
   }
 
   function connectEvents() {

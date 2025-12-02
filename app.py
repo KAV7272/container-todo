@@ -91,7 +91,7 @@ def load_logged_in_user():
     if user_id is not None:
         conn = get_db()
         user = conn.execute(
-            "SELECT id, username, is_admin FROM users WHERE id = ?", (user_id,)
+            "SELECT id, username FROM users WHERE id = ?", (user_id,)
         ).fetchone()
         conn.close()
         g.user = user
@@ -122,28 +122,12 @@ def format_task(row):
     }
 
 
-def user_count():
-    conn = get_db()
-    count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-    conn.close()
-    return count
-
-
 @app.route("/")
 def index():
-    has_users = user_count() > 0
     user_payload = (
-        {
-            "id": g.user["id"],
-            "username": g.user["username"],
-            "is_admin": bool(g.user["is_admin"]),
-        }
-        if g.user
-        else None
+        {"id": g.user["id"], "username": g.user["username"]} if g.user else None
     )
-    return render_template(
-        "index.html", user=user_payload, first_user_allowed=not has_users
-    )
+    return render_template("index.html", user=user_payload)
 
 
 @app.post("/auth/register")
@@ -155,17 +139,10 @@ def register():
         return jsonify({"error": "Username or password too short."}), 400
 
     conn = get_db()
-    user_total = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-    allowed = user_total == 0 or (g.user and g.user["is_admin"])
-    if not allowed:
-        conn.close()
-        return jsonify({"error": "Admin required to create users."}), 403
-
-    is_admin = 1 if user_total == 0 else 0
     try:
         conn.execute(
-            "INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, ?)",
-            (username, generate_password_hash(password), is_admin),
+            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+            (username, generate_password_hash(password)),
         )
         conn.commit()
     except sqlite3.IntegrityError:
@@ -173,17 +150,12 @@ def register():
         return jsonify({"error": "Username already taken."}), 400
 
     user = conn.execute(
-        "SELECT id, username, is_admin FROM users WHERE username = ?", (username,)
+        "SELECT id, username FROM users WHERE username = ?", (username,)
     ).fetchone()
     conn.close()
 
-    # Auto-login only when creating the first admin (no users yet).
-    if user_total == 0 and g.user is None:
-        session["user_id"] = user["id"]
-
-    return jsonify(
-        {"user": {"id": user["id"], "username": user["username"], "is_admin": bool(user["is_admin"])}}
-    )
+    session["user_id"] = user["id"]
+    return jsonify({"user": {"id": user["id"], "username": user["username"]}})
 
 
 @app.post("/auth/login")
@@ -194,8 +166,7 @@ def login():
 
     conn = get_db()
     user = conn.execute(
-        "SELECT id, username, password_hash, is_admin FROM users WHERE username = ?",
-        (username,),
+        "SELECT id, username, password_hash FROM users WHERE username = ?", (username,),
     ).fetchone()
     conn.close()
 
@@ -203,7 +174,7 @@ def login():
         return jsonify({"error": "Invalid credentials."}), 400
 
     session["user_id"] = user["id"]
-    return jsonify({"user": {"id": user["id"], "username": user["username"], "is_admin": bool(user["is_admin"])}})
+    return jsonify({"user": {"id": user["id"], "username": user["username"]}})
 
 
 @app.post("/auth/logout")
@@ -215,7 +186,7 @@ def logout():
 @app.get("/api/me")
 @login_required
 def current_user():
-    return jsonify({"user": {"id": g.user["id"], "username": g.user["username"], "is_admin": bool(g.user["is_admin"])}})
+    return jsonify({"user": {"id": g.user["id"], "username": g.user["username"]}})
 
 
 @app.get("/api/users")
@@ -223,7 +194,7 @@ def current_user():
 def list_users():
     conn = get_db()
     users = conn.execute(
-        "SELECT id, username, created_at, is_admin FROM users ORDER BY created_at ASC"
+        "SELECT id, username, created_at FROM users ORDER BY created_at ASC"
     ).fetchall()
     conn.close()
     return jsonify(
@@ -244,8 +215,6 @@ def list_users():
 @app.delete("/api/users/<int:user_id>")
 @login_required
 def delete_user(user_id: int):
-    if not g.user or not g.user["is_admin"]:
-        return jsonify({"error": "Admin required."}), 403
     conn = get_db()
     user = conn.execute(
         "SELECT id, username FROM users WHERE id = ?", (user_id,)
@@ -467,12 +436,11 @@ def not_found(_):
         {
             "id": g.user["id"],
             "username": g.user["username"],
-            "is_admin": bool(g.user["is_admin"]),
         }
         if g.user
         else None
     )
-    return render_template("index.html", user=user_payload, first_user_allowed=False), 404
+    return render_template("index.html", user=user_payload), 404
 
 
 if __name__ == "__main__":
