@@ -132,8 +132,17 @@ def user_count():
 @app.route("/")
 def index():
     has_users = user_count() > 0
+    user_payload = (
+        {
+            "id": g.user["id"],
+            "username": g.user["username"],
+            "is_admin": bool(g.user["is_admin"]),
+        }
+        if g.user
+        else None
+    )
     return render_template(
-        "index.html", user=g.user, first_user_allowed=not has_users
+        "index.html", user=user_payload, first_user_allowed=not has_users
     )
 
 
@@ -454,7 +463,16 @@ def events():
 
 @app.errorhandler(404)
 def not_found(_):
-    return render_template("index.html", user=g.user), 404
+    user_payload = (
+        {
+            "id": g.user["id"],
+            "username": g.user["username"],
+            "is_admin": bool(g.user["is_admin"]),
+        }
+        if g.user
+        else None
+    )
+    return render_template("index.html", user=user_payload, first_user_allowed=False), 404
 
 
 if __name__ == "__main__":

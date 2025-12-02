@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script>
     window.APP_CONTEXT = {
-      user: {{ ({"id": user["id"], "username": user["username"], "is_admin": bool(user["is_admin"])} if user else None)|tojson }},
+      user: {{ ({"id": user["id"], "username": user["username"], "is_admin": user["is_admin"]} if user else None)|tojson }},
       firstUserAllowed: {{ first_user_allowed|tojson }}
     };
   </script>
